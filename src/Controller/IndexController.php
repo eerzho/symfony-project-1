@@ -8,8 +8,8 @@ use Symfony\Component\Routing\Annotation\Route;
 class IndexController extends AbstractController
 {
     #[Route('/', name: 'test', methods:['GET'])]
-    public function index(): \Symfony\Component\HttpFoundation\JsonResponse
+    public function index()
     {
-        return $this->json(['message' => 'success']);
+        return $this->json(['message' => 'Success!']);
     }
 }

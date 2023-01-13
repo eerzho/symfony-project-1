@@ -1,6 +1,7 @@
 version: "3.4"
 
 services:
+  
   php:
     build:
       context: .
@@ -22,6 +23,8 @@ services:
       retries: 3
       start_period: 30s
     environment:
+      APP_ENV: ${APP_ENV:-prod}
+      APP_DEBUG: ${APP_DEBUG:-false}
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
@@ -73,5 +76,6 @@ volumes:
   caddy_data:
   caddy_config:
   db-data:
+    
 networks:
   symfony_network:
