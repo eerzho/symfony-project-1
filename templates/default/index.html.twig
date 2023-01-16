@@ -42,5 +42,23 @@
             {% endfor %}
         {% endfor %}
 
+        <ul>
+            {% for i in 1..10 %}
+                <li>{{ cycle(['even', 'odd'], i) }}</li>
+            {% endfor %}
+        </ul>
+
+        <div>
+            {{ path('home') }}
+        </div>
+
+        <div>
+            {{ url('home') }}
+        </div>
+
+        <div>
+            {{ asset('images/logo.png') }}
+        </div>
+
     </div>
 {% endblock %}
