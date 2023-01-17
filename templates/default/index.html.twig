@@ -2,6 +2,8 @@
 
 {% block title %}Hello DefaultController!{% endblock %}
 
+{% set string = "super \n mega \n test" %}
+
 {% block body %}
     <style>
         .example-wrapper {
@@ -60,5 +62,26 @@
             {{ asset('images/logo.png') }}
         </div>
 
+        <div>
+            {{ absolute_url(asset('images/logo.png')) }}
+        </div>
+
+        <img src="{{ absolute_url(asset('images/logo.png')) }}" alt="logo">
+
+        <div>
+            {{ string|escape('html') }}
+        </div>
+
+        <div>
+            Here global variable: {{ global_variable }}
+        </div>
+
     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        let route = "{{ string|escape('js') }}"
+        // alert(route);
+    </script>
 {% endblock %}
