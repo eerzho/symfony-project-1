@@ -17,8 +17,8 @@ class DefaultController extends AbstractController
 {
     public function __construct(
         private readonly EntityManagerInterface $manager,
-        private readonly UserRepository $userRepository,
-        private readonly LoggerInterface $logger
+        private readonly UserRepository         $userRepository,
+        private readonly LoggerInterface        $logger
     )
     {
     }
@@ -64,13 +64,21 @@ class DefaultController extends AbstractController
 
         $userOne = $this->userRepository->findOneBy(['name' => 'User-1']);
 
-        if (!$userOne) {
-            throw $this->createNotFoundException('Not user found for name User-1');
+//        if (!$userOne) {
+//            throw $this->createNotFoundException('Not user found for name User-1');
+//        }
+
+        if ($userOne) {
+            $userOne->setName('New User name');
+            $this->manager->flush();
         }
 
-        $userOne->setName('New User name');
+        $userTwo = $this->userRepository->findOneBy(['name' => 'User-2']);
 
-        $this->manager->flush();
+        if ($userTwo) {
+            $this->manager->remove($userTwo);
+            $this->manager->flush();
+        }
 
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
