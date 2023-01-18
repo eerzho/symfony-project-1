@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController
 {
-    public function __construct(private UserRepository $userRepository, private LoggerInterface $logger)
+    public function __construct(private readonly UserRepository $userRepository, private readonly LoggerInterface $logger)
     {
     }
 
@@ -57,9 +57,12 @@ class DefaultController extends AbstractController
 
 //        dump($users);
 
+        $userOne = $this->userRepository->findOneBy(['name' => 'User-1']);
+
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
             'users' => $users,
+            'userOne' => $userOne,
             'random_gifts' => $service->getGifts(),
         ]);
     }
@@ -91,10 +94,5 @@ class DefaultController extends AbstractController
         return $this->render('default/most_popular_posts.html.twig', [
             'posts' => $posts
         ]);
-    }
-
-    public function createUser()
-    {
-
     }
 }
