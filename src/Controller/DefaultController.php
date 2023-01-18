@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Repository\UserRepository;
 use App\Services\GiftService;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -14,7 +15,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController
 {
-    public function __construct(private readonly UserRepository $userRepository, private readonly LoggerInterface $logger)
+    public function __construct(
+        private readonly EntityManagerInterface $manager,
+        private readonly UserRepository $userRepository,
+        private readonly LoggerInterface $logger
+    )
     {
     }
 
@@ -58,6 +63,14 @@ class DefaultController extends AbstractController
 //        dump($users);
 
         $userOne = $this->userRepository->findOneBy(['name' => 'User-1']);
+
+        if (!$userOne) {
+            throw $this->createNotFoundException('Not user found for name User-1');
+        }
+
+        $userOne->setName('New User name');
+
+        $this->manager->flush();
 
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
