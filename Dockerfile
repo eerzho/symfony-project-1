@@ -1,10 +1,17 @@
 ARG PHP_VERSION=8.2
 ARG CADDY_VERSION=2.6
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-ARG HOME_DIR=/home/www-data
 
 FROM php:${PHP_VERSION}-fpm-alpine AS symfony_php
+
+ARG STABILITY="stable"
+ENV STABILITY ${STABILITY}
+
+ARG SYMFONY_VERSION=""
+ENV SYMFONY_VERSION ${SYMFONY_VERSION}
+
+ENV APP_ENV=prod
+
+WORKDIR /srv/app
 
 RUN apk add --no-cache \
 		acl \
@@ -12,9 +19,7 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
-        nodejs \
-        yarn \
-    ;
+	;
 
 ARG APCU_VERSION=5.1.21
 RUN set -eux; \
@@ -50,6 +55,14 @@ RUN set -eux; \
 	\
 	apk del .build-deps
 
+RUN apk add --no-cache --virtual .pgsql-deps postgresql-dev; \
+	docker-php-ext-install -j$(nproc) pdo_pgsql; \
+	apk add --no-cache --virtual .pgsql-rundeps so:libpq.so.5; \
+    apk add nodejs; \
+    apk add npm; \
+    apk add yarn; \
+	apk del .pgsql-deps
+
 COPY docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
 RUN chmod +x /usr/local/bin/docker-healthcheck
 
@@ -72,15 +85,6 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
 WORKDIR /srv/app
-
-ARG SKELETON="symfony/skeleton"
-ENV SKELETON ${SKELETON}
-
-ARG STABILITY="stable"
-ENV STABILITY ${STABILITY}
-
-ARG SYMFONY_VERSION=""
-ENV SYMFONY_VERSION ${SYMFONY_VERSION}
 
 RUN composer create-project "${SKELETON} ${SYMFONY_VERSION}" . --stability=${STABILITY} --prefer-dist --no-dev --no-progress --no-interaction; \
 	composer clear-cache
