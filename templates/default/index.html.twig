@@ -84,7 +84,15 @@
             Request param variable: {{ app.request.get('param') }}
         </div>
 
-
+        <div>
+            <div>
+                Test render controller:
+            </div>
+            {{ render(controller(
+                'App\\Controller\\DefaultController::mostPopularPosts',
+                { 'number': 5 }
+            )) }}
+        </div>
     </div>
 {% endblock %}
 

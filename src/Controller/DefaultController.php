@@ -81,4 +81,15 @@ class DefaultController extends AbstractController
     {
         return new Response('Success!');
     }
+
+    public function mostPopularPosts($number = 3): Response
+    {
+        $posts = array_map(function ($key) {
+            return 'post-' . $key + 1;
+        }, range(0, $number));
+
+        return $this->render('default/most_popular_posts.html.twig', [
+            'posts' => $posts
+        ]);
+    }
 }
