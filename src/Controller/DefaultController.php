@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Services\GiftService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -93,6 +94,12 @@ class DefaultController extends AbstractController
             'userOne' => $userOne,
             'random_gifts' => $service->getGifts(),
         ]);
+    }
+
+    #[Route('/default/user/{id}', name: 'default-user')]
+    public function getOneUser(Request $request, User $user)
+    {
+        dd($user);
     }
 
     #[Route('/default2/{page?}', requirements: ["page" => "\d+"])]
