@@ -80,6 +80,13 @@ class DefaultController extends AbstractController
             $this->manager->flush();
         }
 
+        $sql = '
+        SELECT * FROM user_table u
+        WHERE u.id > :id
+        ';
+
+        $sqlResult = $this->manager->getConnection()->prepare($sql)->executeQuery(['id' => 2])->fetchAllAssociative();
+
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
             'users' => $users,
