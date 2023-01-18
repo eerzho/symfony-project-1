@@ -94,9 +94,11 @@
             )) }}
         </div>
 
-        <div>
-            User name: {{ userOne.name }}
-        </div>
+        {% if (userOne) %}
+            <div>
+                User name: {{ userOne.name }}
+            </div>
+        {% endif %}
 
     </div>
 {% endblock %}
