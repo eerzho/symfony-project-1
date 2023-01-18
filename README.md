@@ -38,7 +38,9 @@ A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony
 8. [Troubleshooting](docs/troubleshooting.md)
 
 ## Help commands
-1. `chown -R $(whoami) ..`
+1. `sudo chown -R $(whoami) ..`
+2. `php bin/console doctrine:schema:drop -n -q --force --full-database`
+3. `rm migrations/*.php`
 
 ## License
 

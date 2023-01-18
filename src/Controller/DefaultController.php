@@ -86,10 +86,15 @@ class DefaultController extends AbstractController
     {
         $posts = array_map(function ($key) {
             return 'post-' . $key + 1;
-        }, range(0, $number));
+        }, range(0, $number - 1));
 
         return $this->render('default/most_popular_posts.html.twig', [
             'posts' => $posts
         ]);
+    }
+
+    public function createUser()
+    {
+
     }
 }
