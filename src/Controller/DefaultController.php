@@ -96,6 +96,17 @@ class DefaultController extends AbstractController
         ]);
     }
 
+    #[Route('/default/user/pre-persist-test', name: 'pre-persist-test')]
+    public function prePersistTest()
+    {
+        $user = new User();
+        $user->setName('Pre persist test');
+        $this->manager->persist($user);
+        $this->manager->flush();
+
+        return $this->json(['message' => 'Success!']);
+    }
+
     #[Route('/default/user/{id}', name: 'default-user')]
     public function getOneUser(Request $request, User $user)
     {
