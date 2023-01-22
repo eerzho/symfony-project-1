@@ -39,6 +39,6 @@ class User
     public function setCreatedAtValues()
     {
         $createAt = new \DateTime();
-        dd($createAt);
+        dump($createAt);
     }
 }
