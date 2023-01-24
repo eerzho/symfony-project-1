@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Video;
 use App\Repository\UserRepository;
 use App\Services\GiftService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -87,6 +88,24 @@ class DefaultController extends AbstractController
         ';
 
         $sqlResult = $this->manager->getConnection()->prepare($sql)->executeQuery(['id' => 2])->fetchAllAssociative();
+
+        $author = new User();
+        $author->setName('Video Author');
+
+        for ($i = 0; $i <= 3; $i++) {
+
+            $video = new Video();
+
+            $video->setTitle('Video title-'.$i);
+
+            $author->addVideo($video);
+
+            $this->manager->persist($video);
+        }
+
+        $this->manager->persist($author);
+
+//        $this->manager->flush();
 
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
