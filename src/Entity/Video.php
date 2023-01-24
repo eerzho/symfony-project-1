@@ -17,6 +17,7 @@ class Video
     private ?string $title = null;
 
     #[ORM\ManyToOne(inversedBy: 'videos')]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?User $author = null;
 
     public function getId(): ?int

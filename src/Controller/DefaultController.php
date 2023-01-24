@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\Video;
 use App\Repository\UserRepository;
+use App\Repository\VideoRepository;
 use App\Services\GiftService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -20,6 +21,7 @@ class DefaultController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $manager,
         private readonly UserRepository         $userRepository,
+        private readonly VideoRepository        $videoRepository,
         private readonly LoggerInterface        $logger
     )
     {
@@ -89,23 +91,32 @@ class DefaultController extends AbstractController
 
         $sqlResult = $this->manager->getConnection()->prepare($sql)->executeQuery(['id' => 2])->fetchAllAssociative();
 
-        $author = new User();
-        $author->setName('Video Author');
-
-        for ($i = 0; $i <= 3; $i++) {
-
-            $video = new Video();
-
-            $video->setTitle('Video title-'.$i);
-
-            $author->addVideo($video);
-
-            $this->manager->persist($video);
-        }
-
-        $this->manager->persist($author);
-
+//        $author = new User();
+//        $author->setName('Video Author');
+//
+//        for ($i = 0; $i <= 3; $i++) {
+//
+//            $video = new Video();
+//
+//            $video->setTitle('Video title-'.$i);
+//
+//            $author->addVideo($video);
+//
+//            $this->manager->persist($video);
+//        }
+//
+//        $this->manager->persist($author);
+//
 //        $this->manager->flush();
+//
+//        $removeTest = $this->userRepository->findOneBy(['id' => 4]);
+//        $this->manager->remove($removeTest);
+//        $this->manager->flush();
+
+        $user = $this->userRepository->findOneBy(['id' => 3]);
+        $video = $this->videoRepository->findOneBy(['id' => 9]);
+        $user->removeVideo($video);
+        $this->manager->flush();
 
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',

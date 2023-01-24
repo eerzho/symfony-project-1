@@ -20,7 +20,7 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Video::class)]
+    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Video::class, cascade: ['all'], orphanRemoval: true)]
     private Collection $videos;
 
     public function __construct()
@@ -49,7 +49,6 @@ class User
     public function setCreatedAtValues()
     {
         $createAt = new \DateTime();
-        dump($createAt);
     }
 
     /**
