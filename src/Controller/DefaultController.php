@@ -3,10 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Author;
-use App\Entity\File;
 use App\Entity\Pdf;
 use App\Entity\User;
-use App\Entity\Video;
 use App\Services\GiftService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
