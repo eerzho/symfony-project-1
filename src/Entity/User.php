@@ -20,12 +20,19 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'author', targetEntity: Video::class, cascade: ['all'], orphanRemoval: true)]
-    private Collection $videos;
+    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    private ?Address $address = null;
+
+    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'following')]
+    private Collection $followed;
+
+    #[ORM\ManyToMany(targetEntity: self::class, mappedBy: 'followed')]
+    private Collection $following;
 
     public function __construct()
     {
-        $this->videos = new ArrayCollection();
+        $this->followed = new ArrayCollection();
+        $this->following = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -46,36 +53,69 @@ class User
     }
 
     #[ORM\PrePersist]
-    public function setCreatedAtValues()
+    public function setCreatedAtValues(): void
     {
         $createAt = new \DateTime();
     }
 
-    /**
-     * @return Collection<int, Video>
-     */
-    public function getVideos(): Collection
+    public function getAddress(): ?Address
     {
-        return $this->videos;
+        return $this->address;
     }
 
-    public function addVideo(Video $video): self
+    public function setAddress(?Address $address): self
     {
-        if (!$this->videos->contains($video)) {
-            $this->videos->add($video);
-            $video->setAuthor($this);
+        $this->address = $address;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getFollowed(): Collection
+    {
+        return $this->followed;
+    }
+
+    public function addFollowed(self $followed): self
+    {
+        if (!$this->followed->contains($followed)) {
+            $this->followed->add($followed);
         }
 
         return $this;
     }
 
-    public function removeVideo(Video $video): self
+    public function removeFollowed(self $followed): self
     {
-        if ($this->videos->removeElement($video)) {
-            // set the owning side to null (unless already changed)
-            if ($video->getAuthor() === $this) {
-                $video->setAuthor(null);
-            }
+        $this->followed->removeElement($followed);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getFollowing(): Collection
+    {
+        return $this->following;
+    }
+
+    public function addFollowing(self $following): self
+    {
+        if (!$this->following->contains($following)) {
+            $this->following->add($following);
+            $following->addFollowed($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFollowing(self $following): self
+    {
+        if ($this->following->removeElement($following)) {
+            $following->removeFollowed($this);
         }
 
         return $this;

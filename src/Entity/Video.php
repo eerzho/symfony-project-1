@@ -6,45 +6,34 @@ use App\Repository\VideoRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
-class Video
+class Video extends File
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
     #[ORM\Column(length: 255)]
-    private ?string $title = null;
+    private ?string $format = null;
 
-    #[ORM\ManyToOne(inversedBy: 'videos')]
-    #[ORM\JoinColumn(onDelete: 'CASCADE')]
-    private ?User $author = null;
+    #[ORM\Column]
+    private ?int $duration = null;
 
-    public function getId(): ?int
+    public function getFormat(): ?string
     {
-        return $this->id;
+        return $this->format;
     }
 
-    public function getTitle(): ?string
+    public function setFormat(string $format): self
     {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): self
-    {
-        $this->title = $title;
+        $this->format = $format;
 
         return $this;
     }
 
-    public function getAuthor(): ?User
+    public function getDuration(): ?int
     {
-        return $this->author;
+        return $this->duration;
     }
 
-    public function setAuthor(?User $author): self
+    public function setDuration(int $duration): self
     {
-        $this->author = $author;
+        $this->duration = $duration;
 
         return $this;
     }

@@ -2,15 +2,14 @@
 
 namespace App\Controller;
 
+use App\Entity\Author;
+use App\Entity\File;
+use App\Entity\Pdf;
 use App\Entity\User;
 use App\Entity\Video;
-use App\Repository\UserRepository;
-use App\Repository\VideoRepository;
 use App\Services\GiftService;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -18,23 +17,18 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController
 {
-    public function __construct(
-        private readonly EntityManagerInterface $manager,
-        private readonly UserRepository         $userRepository,
-        private readonly VideoRepository        $videoRepository,
-        private readonly LoggerInterface        $logger
-    )
+    public function __construct(private readonly EntityManagerInterface $manager)
     {
     }
 
     #[Route('/default', name: 'app_default')]
     public function index(GiftService $service, Request $request, SessionInterface $session): Response
     {
-        $this->logger->info('Start logger test');
+//        $this->logger->info('Start logger test');
 
-        $this->addFlash('notice', 'Flush message test notice');
+//        $this->addFlash('notice', 'Flush message test notice');
 
-        $this->addFlash('warning', 'Flush message test warning');
+//        $this->addFlash('warning', 'Flush message test warning');
 
 //        $cookie = new Cookie(
 //            'my_cookie',
@@ -62,34 +56,34 @@ class DefaultController extends AbstractController
 //            exit($session->get('my_session'));
 //        }
 
-        $users = $this->userRepository->findAll();
+//        $users = $this->userRepository->findAll();
 
 //        dump($users);
 
-        $userOne = $this->userRepository->findOneBy(['name' => 'User-1']);
+//        $userOne = $this->userRepository->findOneBy(['name' => 'User-1']);
 
 //        if (!$userOne) {
 //            throw $this->createNotFoundException('Not user found for name User-1');
 //        }
 
-        if ($userOne) {
-            $userOne->setName('New User name');
-            $this->manager->flush();
-        }
+//        if ($userOne) {
+//            $userOne->setName('New User name');
+//            $this->manager->flush();
+//        }
 
-        $userTwo = $this->userRepository->findOneBy(['name' => 'User-2']);
+//        $userTwo = $this->userRepository->findOneBy(['name' => 'User-2']);
 
-        if ($userTwo) {
-            $this->manager->remove($userTwo);
-            $this->manager->flush();
-        }
+//        if ($userTwo) {
+//            $this->manager->remove($userTwo);
+//            $this->manager->flush();
+//        }
 
-        $sql = '
-        SELECT * FROM user_table u
-        WHERE u.id > :id
-        ';
+//        $sql = '
+//        SELECT * FROM user_table u
+//        WHERE u.id > :id
+//        ';
 
-        $sqlResult = $this->manager->getConnection()->prepare($sql)->executeQuery(['id' => 2])->fetchAllAssociative();
+//        $sqlResult = $this->manager->getConnection()->prepare($sql)->executeQuery(['id' => 2])->fetchAllAssociative();
 
 //        $author = new User();
 //        $author->setName('Video Author');
@@ -113,15 +107,56 @@ class DefaultController extends AbstractController
 //        $this->manager->remove($removeTest);
 //        $this->manager->flush();
 
-        $user = $this->userRepository->findOneBy(['id' => 3]);
-        $video = $this->videoRepository->findOneBy(['id' => 9]);
-        $user->removeVideo($video);
-        $this->manager->flush();
+//        $user = $this->userRepository->findOneBy(['id' => 3]);
+//        $video = $this->videoRepository->findOneBy(['id' => 9]);
+//        $user->removeVideo($video);
+//        $this->manager->flush();
+
+//        $user1 = $this->userRepository->findOneBy(['id' => 1]);
+//        $user2 = $this->userRepository->findOneBy(['id' => 2]);
+//        $user3 = $this->userRepository->findOneBy(['id' => 3]);
+//        $user4 = $this->userRepository->findOneBy(['id' => 4]);
+//
+//        $user1->addFollowed($user2);
+//        $user1->addFollowed($user3);
+//        $user1->addFollowed($user4);
+
+//        $this->manager->flush();
+
+//        dump($user1->getFollowed()->count());
+//        dump($user2->getFollowing()->count());
+
+//        $user = new User();
+//
+//        $user->setName('Robert');
+//
+//        for ($i = 1; $i <= 3; $i++) {
+//            $video = new Video();
+//            $video->setTitle('Video title - ' . $i);
+//            $user->addVideo($video);
+//            $this->manager->persist($video);
+//        }
+//
+//        $this->manager->persist($user);
+//        $this->manager->flush();
+
+//        $user = $this->userRepository->findWithVideos(6);
+
+//        $files = $this->manager->getRepository(File::class)->findAll();
+//        $pfdFiles = $this->manager->getRepository(Pdf::class)->findAll();
+//        $videoFiles = $this->manager->getRepository(Video::class)->findAll();
+
+        $author = $this->manager->getRepository(Author::class)->findByIdWithPdf(1);
+        dump($author);
+
+        foreach ($author->getFiles() as $file) {
+            if ($file instanceof Pdf) {
+                dump($file->getFilename());
+            }
+        }
 
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
-            'users' => $users,
-            'userOne' => $userOne,
             'random_gifts' => $service->getGifts(),
         ]);
     }

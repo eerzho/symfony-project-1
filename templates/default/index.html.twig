@@ -30,12 +30,6 @@
             </li>
         </ul>
 
-        <ul>
-            {% for user in users %}
-                <li>{{ user.name }} - {{ random_gifts[loop.index0] }}</li>
-            {% endfor %}
-        </ul>
-
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 <div class="flush-{{ label }}">
@@ -93,12 +87,6 @@
                 { 'number': 5 }
             )) }}
         </div>
-
-        {% if (userOne) %}
-            <div>
-                User name: {{ userOne.name }}
-            </div>
-        {% endif %}
 
     </div>
 {% endblock %}
