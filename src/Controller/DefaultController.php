@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Author;
-use App\Entity\Pdf;
 use App\Entity\User;
 use App\Services\GiftService;
+use App\Services\MyService2;
+use App\Services\MyService4;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,8 +20,9 @@ class DefaultController extends AbstractController
     }
 
     #[Route('/default', name: 'app_default')]
-    public function index(GiftService $service, Request $request, SessionInterface $session): Response
+    public function index(GiftService $service, Request $request, SessionInterface $session, MyService4 $myService4): Response
     {
+        $myService4->someAction();
 //        $this->logger->info('Start logger test');
 
 //        $this->addFlash('notice', 'Flush message test notice');
@@ -144,14 +145,14 @@ class DefaultController extends AbstractController
 //        $pfdFiles = $this->manager->getRepository(Pdf::class)->findAll();
 //        $videoFiles = $this->manager->getRepository(Video::class)->findAll();
 
-        $author = $this->manager->getRepository(Author::class)->findByIdWithPdf(1);
-        dump($author);
-
-        foreach ($author->getFiles() as $file) {
-            if ($file instanceof Pdf) {
-                dump($file->getFilename());
-            }
-        }
+//        $author = $this->manager->getRepository(Author::class)->findByIdWithPdf(1);
+//        dump($author);
+//
+//        foreach ($author->getFiles() as $file) {
+//            if ($file instanceof Pdf) {
+//                dump($file->getFilename());
+//            }
+//        }
 
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
