@@ -3,11 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Video;
+use App\Event\VideoCreatedEvent;
+use App\Form\VideoFormType;
 use App\Services\GiftService;
-use App\Services\MyService2;
 use App\Services\MyService4;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\TagAwareAdapter;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -15,7 +20,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class DefaultController extends AbstractController
 {
-    public function __construct(private readonly EntityManagerInterface $manager)
+    public function __construct(
+        private readonly EntityManagerInterface $manager,
+        private readonly EventDispatcherInterface $dispatcher
+    )
     {
     }
 
@@ -157,6 +165,122 @@ class DefaultController extends AbstractController
         return $this->render('default/index.html.twig', [
             'controller_name' => 'DefaultController',
             'random_gifts' => $service->getGifts(),
+        ]);
+    }
+
+    #[Route('/default/cache', name: 'app_default_cache')]
+    public function workWithCache(Request $request)
+    {
+//        $cache = new FilesystemAdapter();
+//        $posts = $cache->getItem('database.get_posts');
+//
+//        if (!$posts->isHit()) {
+//            $posts_from_db = ['post 1', 'post 2', 'post 3'];
+//
+//            dump('connection with db ...');
+//
+//            $posts->set(serialize($posts_from_db));
+//            $posts->expiresAfter(5);
+//            $cache->save($posts);
+//        }
+
+//        $cache->delete('database.get_posts');
+//        $cache->clear();
+
+//        dump(unserialize($posts->get()));
+
+//        $cache = new TagAwareAdapter(new FilesystemAdapter());
+//
+//        $acer = $cache->getItem('acer');
+//        $dell = $cache->getItem('dell');
+//        $ibm = $cache->getItem('ibm');
+//
+//        if (!$acer->isHit()) {
+//            $acer_from_db = 'acer laptop';
+//            $acer->set($acer_from_db);
+//            $acer->tag(['computers', 'laptops', 'acer']);
+//            $cache->save($acer);
+//            dump('acer laptop from db...');
+//        }
+//
+//        if (!$dell->isHit()) {
+//            $dell_from_db = 'dell laptop';
+//            $dell->set($dell_from_db);
+//            $dell->tag(['computers', 'laptops', 'dell']);
+//            $cache->save($dell);
+//            dump('dell laptop from db...');
+//        }
+//
+//        if (!$ibm->isHit()) {
+//            $ibm_from_db = 'imb desktop';
+//            $ibm->set($ibm_from_db);
+//            $ibm->tag(['computers', 'desktop', 'ibm']);
+//            $cache->save($ibm);
+//            dump('ibm desktop from db...');
+//        }
+//
+//        $cache->invalidateTags(['computers']);
+//
+//        dump($acer->get());
+//        dump($dell->get());
+//        dump($ibm->get());
+
+        return $this->render('default/index_cache.html.twig', [
+            'controller_name' => 'DefaultController',
+        ]);
+    }
+
+    #[Route('/default/listener', name: 'app_default_listener')]
+    public function workWithListener()
+    {
+        $video = new \stdClass();
+        $video->title = 'Funny movie';
+        $video->category = 'funny';
+
+        $event = new VideoCreatedEvent($video);
+        $this->dispatcher->dispatch($event, 'video.created.event');
+
+        return $this->render('default/index_listener.html.twig', [
+            'controller_name' => 'DefaultController',
+        ]);
+    }
+
+    #[Route('/default/form', name: 'app_default_form')]
+    public function workWithForm(Request $request)
+    {
+//        $videos = $this->manager->getRepository(Video::class)->findAll();
+//        dump($videos);
+
+        $video = new Video();
+
+//        $video->setFilename('super.video')
+//            ->setCreatedAt(new \DateTime('tomorrow'))
+//            ->setDuration(111)
+//            ->setDescription('super video')
+//            ->setFormat('mp4')
+//            ->setSize(111);
+
+//        $video = $this->manager->getRepository(Video::class)->find(25);
+
+        $form = $this->createForm(VideoFormType::class, $video);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $file = $form->get('filename')->getData();
+            $fileName = sha1(random_bytes(14)) . '.' . $file->guesExtension();
+            $file->move(
+                $this->getParameter('videos_directory'),
+                $fileName
+            );
+            $video->setFilename($fileName);
+            $this->manager->persist($video);
+            $this->manager->flush();
+            return $this->redirectToRoute('app_default_form');
+        }
+
+        return $this->render('default/index_form.html.twig', [
+            'controller_name' => 'DefaultController',
+            'form' => $form->createView(),
         ]);
     }
 
