@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Address;
+use App\Entity\SecurityUser;
 use App\Entity\User;
 use App\Entity\Video;
 use App\Event\VideoCreatedEvent;
+use App\Form\RegisterUserType;
 use App\Form\VideoFormType;
 use App\Services\GiftService;
 use App\Services\MyService4;
@@ -16,12 +19,14 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class DefaultController extends AbstractController
 {
     public function __construct(
-        private readonly EntityManagerInterface $manager,
+        private readonly EntityManagerInterface   $manager,
         private readonly EventDispatcherInterface $dispatcher
     )
     {
@@ -281,6 +286,47 @@ class DefaultController extends AbstractController
         return $this->render('default/index_form.html.twig', [
             'controller_name' => 'DefaultController',
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/default/security', name: 'app_default_security')]
+    public function workWithSecurity(Request $request, UserPasswordHasherInterface $passwordHasher)
+    {
+        $users = $this->manager->getRepository(SecurityUser::class)->findAll();
+        dump($users);
+
+        $user = new SecurityUser();
+        $form = $this->createForm(RegisterUserType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $user->setEmail($form->get('email')->getData())
+                ->setPassword(
+                    $passwordHasher->hashPassword($user, $form->get('password')->getData())
+                );
+
+            $this->manager->persist($user);
+            $this->manager->flush();
+
+            return $this->redirectToRoute('app_default_security');
+        }
+
+        return $this->render('default/index_security.html.twig', [
+            'controller_name' => 'DefaultController',
+            'form' => $form->createView()
+        ]);
+    }
+
+    #[Route('/login', name: 'login')]
+    public function login(AuthenticationUtils $authenticationUtils)
+    {
+        $error = $authenticationUtils->getLastAuthenticationError();
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        return $this->render('security/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error' => $error
         ]);
     }
 
