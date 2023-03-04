@@ -35,18 +35,18 @@
             </li>
         </ul>
 
-        {{ form(form) }}
-
-        {% if app.user %}
-            <a href="{{ path('logout') }}">logout</a>
-        {% endif %}
-
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-            <div>
-                Email: {{ app.user.email }}
-            </div>
-        {% endif %}
-
+{#        {% trans %}#}
+{#            some.key#}
+{#        {% endtrans %}#}
+{#        OR#}
+        {{ 'some.key'|trans|raw }}
+        <div>
+            <a href="{{ path('login') }}">Login page on current locale</a>
+            <br>
+            <a href="{{ path('login.en') }}">Login page on en locale</a>
+            <br>
+            <a href="{{ path('login.pl') }}">Login page on pl locale</a>
+        </div>
     </div>
 
 {% endblock %}

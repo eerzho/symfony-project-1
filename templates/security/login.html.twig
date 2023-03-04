@@ -16,6 +16,12 @@
 
         <input type="hidden" name="_target_path" value="{{ path('app_default_security') }}">
 
+        <div class="checkbox mb-3">
+            <label>
+                <input type="checkbox" name="_remember_me"> Remember me
+            </label>
+        </div>
+
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
         <button type="submit">login</button>

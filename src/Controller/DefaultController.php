@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Address;
 use App\Entity\SecurityUser;
 use App\Entity\User;
 use App\Entity\Video;
@@ -12,16 +11,20 @@ use App\Form\VideoFormType;
 use App\Services\GiftService;
 use App\Services\MyService4;
 use Doctrine\ORM\EntityManagerInterface;
+use JetBrains\PhpStorm\NoReturn;
+use stdClass;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Adapter\TagAwareAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DefaultController extends AbstractController
 {
@@ -174,7 +177,7 @@ class DefaultController extends AbstractController
     }
 
     #[Route('/default/cache', name: 'app_default_cache')]
-    public function workWithCache(Request $request)
+    public function workWithCache(Request $request): Response
     {
 //        $cache = new FilesystemAdapter();
 //        $posts = $cache->getItem('database.get_posts');
@@ -236,9 +239,9 @@ class DefaultController extends AbstractController
     }
 
     #[Route('/default/listener', name: 'app_default_listener')]
-    public function workWithListener()
+    public function workWithListener(): Response
     {
-        $video = new \stdClass();
+        $video = new stdClass();
         $video->title = 'Funny movie';
         $video->category = 'funny';
 
@@ -251,7 +254,7 @@ class DefaultController extends AbstractController
     }
 
     #[Route('/default/form', name: 'app_default_form')]
-    public function workWithForm(Request $request)
+    public function workWithForm(Request $request): RedirectResponse|Response
     {
 //        $videos = $this->manager->getRepository(Video::class)->findAll();
 //        dump($videos);
@@ -290,7 +293,7 @@ class DefaultController extends AbstractController
     }
 
     #[Route('/default/security', name: 'app_default_security')]
-    public function workWithSecurity(Request $request, UserPasswordHasherInterface $passwordHasher)
+    public function workWithSecurity(Request $request, UserPasswordHasherInterface $passwordHasher): RedirectResponse|Response
     {
         $users = $this->manager->getRepository(SecurityUser::class)->findAll();
         dump($users);
@@ -318,8 +321,23 @@ class DefaultController extends AbstractController
         ]);
     }
 
-    #[Route('/login', name: 'login')]
-    public function login(AuthenticationUtils $authenticationUtils)
+    #[Route('/default/translation', name: 'app_default_translation', methods: ['GET'])]
+    public function workWithTranslation(Request $request, TranslatorInterface $translator): Response
+    {
+        $result = $translator->trans('some.key');
+        dump($result);
+        dump($request->getLocale());
+
+        return $this->render('default/index_translation.html.twig', [
+            'controller_name' => 'DefaultController'
+        ]);
+    }
+
+    #[Route([
+        'en' => '/login',
+        'pl' => '/polish/login'
+    ], name: 'login')]
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
@@ -330,8 +348,18 @@ class DefaultController extends AbstractController
         ]);
     }
 
+    #[Route('/default/{id}/delete-own-video', name: 'app_default_delete_own_video')]
+    #[IsGranted('video_edit', subject: 'video')]
+    public function deleteOwnVideo(Request $request, Video $video): JsonResponse
+    {
+        $this->manager->remove($video);
+        $this->manager->flush();
+
+        return $this->json(['message' => 'success!']);
+    }
+
     #[Route('/default/user/pre-persist-test', name: 'pre-persist-test')]
-    public function prePersistTest()
+    public function prePersistTest(): JsonResponse
     {
         $user = new User();
         $user->setName('Pre persist test');
@@ -341,7 +369,7 @@ class DefaultController extends AbstractController
         return $this->json(['message' => 'Success!']);
     }
 
-    #[Route('/default/user/{id}', name: 'default-user')]
+    #[NoReturn] #[Route('/default/user/{id}', name: 'default-user')]
     public function getOneUser(Request $request, User $user)
     {
         dd($user);
@@ -359,7 +387,7 @@ class DefaultController extends AbstractController
         return new Response('Success!');
     }
 
-    #[Route(['nl' => '/over-ons', 'en' => '/about-us'])]
+    #[Route(['pl' => '/over-ons', 'en' => '/about-us'])]
     public function zadrRouteLVL3(): Response
     {
         return new Response('Success!');
